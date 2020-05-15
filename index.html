@@ -6,7 +6,6 @@
 	<title>Testing Sites Map</title>
 	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 	<script src="stats.json"></script>
-	<script src="https://momentjs.com/downloads/moment.min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
 	<script src="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js"></script>
 	<link href="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css" rel="stylesheet" />
@@ -15,12 +14,13 @@
 
 <body>
 	<div id="map">
-		<div id="cases-legend" class="legend" style="display: block;">
+		<div id="Claims-legend" class="legend" style="display: block;">
 			<h3>Claimed Counties</h3>
 			<div><span style="background-color: #ece7f2"></span>No Claims</div>
 			<div><span style="background-color: #2b8cbe"></span>Claimed</div>
 		</div>
 		<div id="info-box" class="info" style="display: block;">Hover over a county for info</div>
+		<nav id="menu"></nav>
 	</div>
 	<script src="scripts.js" defer></script>
 </body>

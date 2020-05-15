@@ -29,15 +29,12 @@ function drawMap() {
 	newData = formatData();
 
 	var newCountyExpression = ['match', ['get', 'fips']];
-
 	newData.forEach(function (row) {
 		number = (row['claims'])
 		var color = (number > 0) ? "#2b8cbe" : "#ece7f2";
 		newCountyExpression.push(row['fips'], color);
 	});
-
 	newCountyExpression.push('rgba(255,255,255,1)');
-
 	map.setPaintProperty('counties', 'fill-color', newCountyExpression)
 }
 
@@ -53,7 +50,7 @@ map.on('load', function () {
 		url: 'mapbox://gsepulveda96.statelines'
 	});
 
-	//console.log(map.getStyle().layers);
+	console.log(map.getStyle().layers);
 	// Add layer from the vector tile source with countyData-driven style
 
 
@@ -65,7 +62,7 @@ map.on('load', function () {
 		'paint': {
 			'fill-outline-color': '#ffffff',
 		}
-	}, 'road-minor-low');
+	}, 'road-motorway-trunk');
 
 	map.addLayer({
 		'id': 'statelines',
@@ -105,5 +102,24 @@ map.on('load', function () {
 	});
 
 	map.dragRotate.disable();
+	
+	//Toggle County Button
+	var link = document.createElement('a');
+	link.href = '#';
+	link.className = ''
+	link.textContent = 'Toggle Claims/Sites'
 
+	link.onclick = function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		if (this.className === '') {
+			this.className = 'active';
+		} else {
+			mortalButtonSelected = false;
+			this.className = ''
+		}
+	}
+	var layers = document.getElementById('menu');
+	layers.appendChild(link);
 });
