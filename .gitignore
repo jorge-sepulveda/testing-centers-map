@@ -1,0 +1,5 @@
+src/pyscraper/popFiles/*.json
+src/statemap
+tokens.txt
+time-series-counties.json
+time-series-states.json
