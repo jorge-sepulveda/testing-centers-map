@@ -22,16 +22,15 @@ function formatData() {
 	return formattedData;
 }
 
-
-
-function drawMap() {
-
+function drawMap(buttonCheck) {
 	newData = formatData();
+	key = (buttonCheck === true) ? 'sites' : 'claims'
+	colorSchemes = (buttonCheck === true) ? [ '#756bb1','#efedf5'] : ['#2b8cbe', '#ece7f2']
 
 	var newCountyExpression = ['match', ['get', 'fips']];
 	newData.forEach(function (row) {
-		number = (row['claims'])
-		var color = (number > 0) ? "#2b8cbe" : "#ece7f2";
+		number = (row[key])
+		var color = (number > 0) ? colorSchemes[0] : colorSchemes[1];
 		newCountyExpression.push(row['fips'], color);
 	});
 	newCountyExpression.push('rgba(255,255,255,1)');
@@ -75,7 +74,7 @@ map.on('load', function () {
 		}
 	}), 'state-label';
 
-	drawMap()
+	drawMap(false)
 
 	//mortalButtonSelected = false;
 	//reloadData(mortalButtonSelected)
@@ -104,22 +103,30 @@ map.on('load', function () {
 	map.dragRotate.disable();
 	
 	//Toggle County Button
-	var link = document.createElement('a');
-	link.href = '#';
-	link.className = ''
-	link.textContent = 'Toggle Claims/Sites'
+	var claimsiteButton = document.createElement('a');
+	claimsiteButton.href = '#';
+	claimsiteButton.className = ''
+	claimsiteButton.textContent = 'Toggle Claims/Sites'
 
-	link.onclick = function (e) {
+	claimsiteButton.onclick = function (e) {
 		e.preventDefault();
 		e.stopPropagation();
 
 		if (this.className === '') {
 			this.className = 'active';
+			buttonSelected = true;
+			drawMap(buttonSelected);
+			document.getElementById('claims-legend').style.display = 'none';
+			document.getElementById('sites-legend').style.display = 'block';
 		} else {
 			mortalButtonSelected = false;
 			this.className = ''
+			buttonSelected = false;
+			drawMap(buttonSelected);
+			document.getElementById('claims-legend').style.display = 'block';
+			document.getElementById('sites-legend').style.display = 'none';
 		}
 	}
 	var layers = document.getElementById('menu');
-	layers.appendChild(link);
+	layers.appendChild(claimsiteButton);
 });
