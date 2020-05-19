@@ -1,7 +1,9 @@
 $(document).ready(function () {
+	getStats()
 });
 
 
+var formattedData;
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ3NlcHVsdmVkYTk2IiwiYSI6ImNrYTQ2cm9wMjBtM2IzZG12eWFmNm1zMW0ifQ.w4BLAhSp5wKs4LrRQmBbTg';
 var map = new mapboxgl.Map({
 	container: 'map',
@@ -12,23 +14,67 @@ var map = new mapboxgl.Map({
 	maxZoom: 10
 });
 
-function formatData() {
-	formattedData = []
-	for (var key of Object.keys(data)) {
-		var objectToAdd = { 'fips' : key, 'claims' : data[key]['claims'], 'sites' : data[key]['sites']} ;
+
+function reloadData(mortalButtonSelected) {
+	dateToLoad = moment($("#mapdate").val()).format('YYYY-MM-DD').toString();
+	console.log('loading ' + dateToLoad);
+	currentDateSelected = dateToLoad
+	console.log(currentDateSelected)
+
+	stateURL = 'https://raw.githubusercontent.com/jorge-sepulveda/covid-time-map/master/src/pyscraper/outputFiles/states/' + currentDateSelected + '.json'
+	countyURL = 'https://raw.githubusercontent.com/jorge-sepulveda/covid-time-map/master/src/pyscraper/outputFiles/counties/' + currentDateSelected + '.json'
+	$.when(
+		$.getJSON(countyURL, function (data) {
+			countyData = data;
+		}),
+		$.getJSON(stateURL, function (data) {
+			stateData = data;
+		})
+	).then(function (cData, sData) {
+		if (cData && sData) {
+			mortalButtonSelected ? drawDeathMap() : drawCasesMap();
+		} else {
+			alert('something went horribly wrong')
+		}
+	});
+}
+
+
+function getStats(){
+	$.when(
+		$.getJSON("https://nodes.geoservices.tamu.edu/api/covid/counties/stats", function (statdata) {
+			data = statdata;
+		})
+	).then(function (statData) {
+		if (statData) {
+			formatData(statData);
+		} else {
+			alert('something went horribly wrong')
+		}
+	});
+}
+
+function formatData(responseData) {
+
+	console.log('in format')
+	//console.log(responseData);
+	formattedData = [];
+	for (var key of Object.keys(responseData)) {
+		var objectToAdd = { 'fips' : key, 'claims' : responseData[key]['claims'], 'sites' : responseData[key]['sites']} ;
 		//console.log(objectToAdd);
 		formattedData.push(objectToAdd);
 	}
-	return formattedData;
+	console.log(formattedData);
 }
 
 function drawMap(buttonCheck) {
-	newData = formatData();
+	console.log('in draw map')
+	console.log(formattedData)
 	key = (buttonCheck === true) ? 'sites' : 'claims'
 	colorSchemes = (buttonCheck === true) ? [ '#756bb1','#efedf5'] : ['#2b8cbe', '#ece7f2']
 
 	var newCountyExpression = ['match', ['get', 'fips']];
-	newData.forEach(function (row) {
+	formattedData.forEach(function (row) {
 		number = (row[key])
 		var color = (number > 0) ? colorSchemes[0] : colorSchemes[1];
 		newCountyExpression.push(row['fips'], color);
@@ -49,7 +95,7 @@ map.on('load', function () {
 		url: 'mapbox://gsepulveda96.statelines'
 	});
 
-	console.log(map.getStyle().layers);
+	//console.log(map.getStyle().layers);
 	// Add layer from the vector tile source with countyData-driven style
 
 
@@ -74,10 +120,7 @@ map.on('load', function () {
 		}
 	}), 'state-label';
 
-	drawMap(false)
-
-	//mortalButtonSelected = false;
-	//reloadData(mortalButtonSelected)
+	drawMap()
 
 	map.on('mousemove', 'counties', function (e) {
 		map.getCanvas().style.cursor = 'pointer';
