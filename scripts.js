@@ -55,21 +55,17 @@ function getStats(){
 }
 
 function formatData(responseData) {
-
-	console.log('in format')
-	//console.log(responseData);
 	formattedData = [];
 	for (var key of Object.keys(responseData)) {
 		var objectToAdd = { 'fips' : key, 'claims' : responseData[key]['claims'], 'sites' : responseData[key]['sites']} ;
 		//console.log(objectToAdd);
 		formattedData.push(objectToAdd);
 	}
-	console.log(formattedData);
 }
 
 function drawMap(buttonCheck) {
-	console.log('in draw map')
-	console.log(formattedData)
+	//console.log('in draw map')
+	//console.log(formattedData)
 	key = (buttonCheck === true) ? 'sites' : 'claims'
 	colorSchemes = (buttonCheck === true) ? [ '#756bb1','#efedf5'] : ['#2b8cbe', '#ece7f2']
 
@@ -83,6 +79,31 @@ function drawMap(buttonCheck) {
 	map.setPaintProperty('counties', 'fill-color', newCountyExpression)
 }
 
+function reloadSidebar(fipsCode, countyName) {
+	urlEndpoint = 'https://nodes.geoservices.tamu.edu/api/covid/sites/county/' + fipsCode
+
+	$.when(
+		$.getJSON(urlEndpoint, function (sites) {
+			stuff = sites;
+		})
+	).then(function (siteData) {
+		if (siteData.length > 0) {
+			$('#data-display').empty();
+			$('#data-display').append('<p>Sites in ' + siteData[0].location.county + ' County, ' + siteData[0].location.state + '</p>');
+			siteData.forEach(function(site) {
+				var stringToBuild = ('<ul><li><b>' + site.info.locationName +  '</b></li>'+
+										 '<li>' + site.info.locationPhoneNumber +'</ul>');
+				$('#data-display').append(stringToBuild);
+				console.log(site);
+			});
+			
+		} else {
+			$('#data-display').empty();
+			$('#data-display').append('<p>No sites in this county</p>');
+		}
+	});
+
+}
 
 map.on('load', function () {
 	map.addSource('county-lines', {
@@ -97,7 +118,6 @@ map.on('load', function () {
 
 	//console.log(map.getStyle().layers);
 	// Add layer from the vector tile source with countyData-driven style
-
 
 	map.addLayer({
 		'id': 'counties',
@@ -144,6 +164,20 @@ map.on('load', function () {
 	});
 
 	map.dragRotate.disable();
+
+	map.on('click', 'counties', function (e) {
+		var coordinates = e.features[0].geometry.coordinates.slice();
+		// Single out the first found feature.
+		while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+			coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+		}
+		var feature = e.features[0];
+		selectedCounty = formattedData.filter(county => county.fips === feature.properties.fips);
+
+		fipsCode  = feature.properties.fips
+		console.log(fipsCode)
+		reloadSidebar(fipsCode)
+	})
 	
 	//Toggle County Button
 	var claimsiteButton = document.createElement('a');
