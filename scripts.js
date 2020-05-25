@@ -15,31 +15,6 @@ var map = new mapboxgl.Map({
 });
 
 
-function reloadData(mortalButtonSelected) {
-	dateToLoad = moment($("#mapdate").val()).format('YYYY-MM-DD').toString();
-	console.log('loading ' + dateToLoad);
-	currentDateSelected = dateToLoad
-	console.log(currentDateSelected)
-
-	stateURL = 'https://raw.githubusercontent.com/jorge-sepulveda/covid-time-map/master/src/pyscraper/outputFiles/states/' + currentDateSelected + '.json'
-	countyURL = 'https://raw.githubusercontent.com/jorge-sepulveda/covid-time-map/master/src/pyscraper/outputFiles/counties/' + currentDateSelected + '.json'
-	$.when(
-		$.getJSON(countyURL, function (data) {
-			countyData = data;
-		}),
-		$.getJSON(stateURL, function (data) {
-			stateData = data;
-		})
-	).then(function (cData, sData) {
-		if (cData && sData) {
-			mortalButtonSelected ? drawDeathMap() : drawCasesMap();
-		} else {
-			alert('something went horribly wrong')
-		}
-	});
-}
-
-
 function getStats(){
 	$.when(
 		$.getJSON("https://nodes.geoservices.tamu.edu/api/covid/counties/stats", function (statdata) {
@@ -89,17 +64,19 @@ function reloadSidebar(fipsCode, countyName) {
 	).then(function (siteData) {
 		if (siteData.length > 0) {
 			$('#data-display').empty();
-			$('#data-display').append('<p>Sites in ' + siteData[0].location.county + ' County, ' + siteData[0].location.state + '</p>');
+			$('#data-display').append('<h3>Sites in ' + siteData[0].location.county + ' County, ' + siteData[0].location.state + '</h3>');
 			siteData.forEach(function(site) {
-				var stringToBuild = ('<ul><li><b>' + site.info.locationName +  '</b></li>'+
-										 '<li>' + site.info.locationPhoneNumber +'</ul>');
+				siteObject = site['info']['websites'][0].value;
+				siteURL = siteObject.value
+				var stringToBuild = ('<div class = "center-box"><p><b>' + site.info.locationName +  '</b></p>'+
+										 '<p>' + site.info.locationPhoneNumber + '</p>' +
+										 '<a href = ' + siteURL  + '>Website</a>'  +'</div>');
 				$('#data-display').append(stringToBuild);
-				console.log(site);
+				//console.log(site);
 			});
-			
 		} else {
 			$('#data-display').empty();
-			$('#data-display').append('<p>No sites in this county</p>');
+			$('#data-display').append('<h3>No sites in this county</h3>');
 		}
 	});
 

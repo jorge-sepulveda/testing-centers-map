@@ -26,6 +26,15 @@
 	width: 10px;
 }
 
+.center-box{
+	box-shadow: 5px 5px 5px #888888;
+	border: 2px solid #756bb1;
+	border-radius: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 10px;
+}
+
 button {
 	background-color: hsl(241, 43%, 38%); /* Green */
 	border: none;
