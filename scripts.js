@@ -2,7 +2,6 @@ $(document).ready(function () {
 	getStats()
 });
 
-
 var formattedData;
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ3NlcHVsdmVkYTk2IiwiYSI6ImNrYTQ2cm9wMjBtM2IzZG12eWFmNm1zMW0ifQ.w4BLAhSp5wKs4LrRQmBbTg';
 var map = new mapboxgl.Map({
@@ -13,7 +12,6 @@ var map = new mapboxgl.Map({
 	minZoom: 3,
 	maxZoom: 10
 });
-
 
 function getStats(){
 	$.when(
@@ -54,9 +52,8 @@ function drawMap(buttonCheck) {
 	map.setPaintProperty('counties', 'fill-color', newCountyExpression)
 }
 
-function reloadSidebar(fipsCode, countyName) {
+function reloadSidebar(fipsCode) {
 	urlEndpoint = 'https://nodes.geoservices.tamu.edu/api/covid/sites/county/' + fipsCode
-
 	$.when(
 		$.getJSON(urlEndpoint, function (sites) {
 			stuff = sites;
@@ -66,20 +63,27 @@ function reloadSidebar(fipsCode, countyName) {
 			$('#data-display').empty();
 			$('#data-display').append('<h3>Sites in ' + siteData[0].location.county + ' County, ' + siteData[0].location.state + '</h3>');
 			siteData.forEach(function(site) {
-				siteObject = site['info']['websites'][0].value;
-				siteURL = siteObject.value
+				var siteURL;
+				var siteObject;
+				var phoneNumber;
+				if (site['info']['websites'][0] === undefined){
+					siteURL = '<a>Website Not Available</a>';
+				}
+				else {
+					siteObject = site['info']['websites'][0]['value']
+					siteURL = '<a href = ' + siteObject.value + ' target="_blank">Website</a>';
+				}
+				site.info.locationPhoneNumber.length > 0 ? phoneNumber = site.info.locationPhoneNumber : phoneNumber = 'No Phone Number';
 				var stringToBuild = ('<div class = "center-box"><p><b>' + site.info.locationName +  '</b></p>'+
-										 '<p>' + site.info.locationPhoneNumber + '</p>' +
-										 '<a href = ' + siteURL  + '>Website</a>'  +'</div>');
+										 '<p>' + phoneNumber + '</p>' +
+										 siteURL  +'</div>');
 				$('#data-display').append(stringToBuild);
-				//console.log(site);
 			});
 		} else {
 			$('#data-display').empty();
 			$('#data-display').append('<h3>No sites in this county</h3>');
 		}
 	});
-
 }
 
 map.on('load', function () {
@@ -117,7 +121,7 @@ map.on('load', function () {
 		}
 	}), 'state-label';
 
-	drawMap()
+	drawMap(true)
 
 	map.on('mousemove', 'counties', function (e) {
 		map.getCanvas().style.cursor = 'pointer';
@@ -159,7 +163,7 @@ map.on('load', function () {
 	//Toggle County Button
 	var claimsiteButton = document.createElement('a');
 	claimsiteButton.href = '#';
-	claimsiteButton.className = ''
+	claimsiteButton.className = 'active'
 	claimsiteButton.textContent = 'Toggle Claims/Sites'
 
 	claimsiteButton.onclick = function (e) {
