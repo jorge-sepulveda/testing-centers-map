@@ -13,7 +13,7 @@ var map = new mapboxgl.Map({
 	maxZoom: 10
 });
 
-function getStats(){
+function getStats() {
 	$.when(
 		$.getJSON("https://nodes.geoservices.tamu.edu/api/covid/counties/stats", function (statdata) {
 			data = statdata;
@@ -30,7 +30,11 @@ function getStats(){
 function formatData(responseData) {
 	formattedData = [];
 	for (var key of Object.keys(responseData)) {
-		var objectToAdd = { 'fips' : key, 'claims' : responseData[key]['claims'], 'sites' : responseData[key]['sites']} ;
+		var objectToAdd = {
+			'fips': key,
+			'claims': responseData[key]['claims'],
+			'sites': responseData[key]['sites']
+		};
 		//console.log(objectToAdd);
 		formattedData.push(objectToAdd);
 	}
@@ -40,7 +44,7 @@ function drawMap(buttonCheck) {
 	//console.log('in draw map')
 	//console.log(formattedData)
 	key = (buttonCheck === true) ? 'sites' : 'claims'
-	colorSchemes = (buttonCheck === true) ? [ '#756bb1','#efedf5'] : ['#2b8cbe', '#ece7f2']
+	colorSchemes = (buttonCheck === true) ? ['#756bb1', '#efedf5'] : ['#2b8cbe', '#ece7f2']
 
 	var newCountyExpression = ['match', ['get', 'fips']];
 	formattedData.forEach(function (row) {
@@ -62,21 +66,20 @@ function reloadSidebar(fipsCode) {
 		if (siteData.length > 0) {
 			$('#data-display').empty();
 			$('#data-display').append('<h3>Sites in ' + siteData[0].location.county + ' County, ' + siteData[0].location.state + '</h3>');
-			siteData.forEach(function(site) {
+			siteData.forEach(function (site) {
 				var siteURL;
 				var siteObject;
 				var phoneNumber;
-				if (site['info']['websites'][0] === undefined){
+				if (site['info']['websites'][0] === undefined) {
 					siteURL = '<a>Website Not Available</a>';
-				}
-				else {
+				} else {
 					siteObject = site['info']['websites'][0]['value']
 					siteURL = '<a href = ' + siteObject.value + ' target="_blank">Website</a>';
 				}
 				site.info.locationPhoneNumber.length > 0 ? phoneNumber = site.info.locationPhoneNumber : phoneNumber = 'No Phone Number';
-				var stringToBuild = ('<div class = "center-box"><p><b>' + site.info.locationName +  '</b></p>'+
-										 '<p>' + phoneNumber + '</p>' +
-										 siteURL  +'</div>');
+				var stringToBuild = ('<div class = "center-box"><p><b>' + site.info.locationName + '</b></p>' +
+					'<p>' + phoneNumber + '</p>' +
+					siteURL + '</div>');
 				$('#data-display').append(stringToBuild);
 			});
 		} else {
@@ -155,11 +158,11 @@ map.on('load', function () {
 		var feature = e.features[0];
 		selectedCounty = formattedData.filter(county => county.fips === feature.properties.fips);
 
-		fipsCode  = feature.properties.fips
+		fipsCode = feature.properties.fips
 		console.log(fipsCode)
 		reloadSidebar(fipsCode)
 	})
-	
+
 	//Toggle County Button
 	var claimsiteButton = document.createElement('a');
 	claimsiteButton.href = '#';
