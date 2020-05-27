@@ -56,6 +56,11 @@ function drawMap(buttonCheck) {
 	map.setPaintProperty('counties', 'fill-color', newCountyExpression)
 }
 
+function resetBox() {
+	$('#data-display').empty();
+	$('#data-display').append('<h3>Click on a county to get sites</h3>');
+}
+
 function reloadSidebar(fipsCode) {
 	urlEndpoint = 'https://nodes.geoservices.tamu.edu/api/covid/sites/county/' + fipsCode
 	$.when(
